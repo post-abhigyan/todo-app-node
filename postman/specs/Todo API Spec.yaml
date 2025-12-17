@@ -1,0 +1,351 @@
+openapi: 3.0.0
+info:
+  title: Todo API SPec
+  version: 1.0.0
+  description: |
+    A RESTful API for managing TODO items. This API provides CRUD operations 
+    for todos with in-memory storage. Each todo has a title, optional description, 
+    completion status, and timestamps.
+servers:
+  - url: 'http://localhost:3000'
+    description: Local development server
+paths:
+  /:
+    get:
+      summary: Get API information
+      description: Returns basic information about the API including version and available endpoints
+      operationId: getApiInfo
+      tags:
+        - Info
+      responses:
+        '200':
+          description: API information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfo'
+  /todos:
+    get:
+      summary: Get all todos
+      description: Retrieves a list of all todo items
+      operationId: getAllTodos
+      tags:
+        - Todos
+      responses:
+        '200':
+          description: List of todos retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoListResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create a new todo
+      description: Creates a new todo item with the provided title and optional description
+      operationId: createTodo
+      tags:
+        - Todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoRequest'
+      responses:
+        '201':
+          description: Todo created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '400':
+          description: Bad request - Title is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Title is required
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/todos/{id}':
+    get:
+      summary: Get a specific todo
+      description: Retrieves a single todo item by its ID
+      operationId: getTodoById
+      tags:
+        - Todos
+      parameters:
+        - $ref: '#/components/parameters/TodoId'
+      responses:
+        '200':
+          description: Todo retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '404':
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Todo not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update a todo
+      description: Updates an existing todo item. All fields are optional - only provided fields will be updated.
+      operationId: updateTodo
+      tags:
+        - Todos
+      parameters:
+        - $ref: '#/components/parameters/TodoId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoRequest'
+      responses:
+        '200':
+          description: Todo updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '400':
+          description: Bad request - Title cannot be empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Title cannot be empty
+        '404':
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Todo not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a todo
+      description: Deletes a todo item by its ID and returns the deleted item
+      operationId: deleteTodo
+      tags:
+        - Todos
+      parameters:
+        - $ref: '#/components/parameters/TodoId'
+      responses:
+        '200':
+          description: Todo deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '404':
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Todo not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  parameters:
+    TodoId:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the todo item
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+  schemas:
+    Todo:
+      type: object
+      description: A todo item
+      required:
+        - id
+        - title
+        - description
+        - completed
+        - createdAt
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the todo
+          example: 1
+        title:
+          type: string
+          description: The title of the todo item
+          example: Buy groceries
+        description:
+          type: string
+          description: Optional detailed description of the todo
+          example: 'Milk, eggs, bread, and butter'
+        completed:
+          type: boolean
+          description: Whether the todo has been completed
+          default: false
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the todo was created
+          example: '2024-01-15T10:30:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the todo was last updated
+          example: '2024-01-15T14:45:00.000Z'
+    CreateTodoRequest:
+      type: object
+      description: Request body for creating a new todo
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: 'The title of the todo item (required, cannot be empty)'
+          minLength: 1
+          example: Buy groceries
+        description:
+          type: string
+          description: Optional detailed description of the todo
+          example: 'Milk, eggs, bread, and butter'
+    UpdateTodoRequest:
+      type: object
+      description: Request body for updating an existing todo. All fields are optional.
+      properties:
+        title:
+          type: string
+          description: The new title for the todo (cannot be empty if provided)
+          minLength: 1
+          example: Buy groceries and supplies
+        description:
+          type: string
+          description: The new description for the todo
+          example: 'Milk, eggs, bread, butter, and cheese'
+        completed:
+          type: boolean
+          description: The new completion status
+          example: true
+    TodoResponse:
+      type: object
+      description: Standard response containing a single todo
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+          example: true
+        data:
+          $ref: '#/components/schemas/Todo'
+    TodoListResponse:
+      type: object
+      description: Standard response containing a list of todos
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+          example: true
+        data:
+          type: array
+          description: Array of todo items
+          items:
+            $ref: '#/components/schemas/Todo'
+    ErrorResponse:
+      type: object
+      description: Standard error response
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          description: Always false for error responses
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+          example: Todo not found
+    ApiInfo:
+      type: object
+      description: API information response
+      required:
+        - message
+        - version
+        - endpoints
+      properties:
+        message:
+          type: string
+          description: API name/title
+          example: Todo App API
+        version:
+          type: string
+          description: API version
+          example: 1.0.0
+        endpoints:
+          type: object
+          description: Available API endpoints and their descriptions
+          properties:
+            GET /todos:
+              type: string
+              example: Get all todos
+            'GET /todos/:id':
+              type: string
+              example: Get a specific todo
+            POST /todos:
+              type: string
+              example: Create a new todo
+            'PUT /todos/:id':
+              type: string
+              example: Update a todo
+            'DELETE /todos/:id':
+              type: string
+              example: Delete a todo
+tags:
+  - name: Info
+    description: API information endpoints
+  - name: Todos
+    description: Todo CRUD operations
