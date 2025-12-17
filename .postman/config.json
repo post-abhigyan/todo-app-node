@@ -1,0 +1,16 @@
+{
+  "workspace": {
+    "id": "608f30c2-4cec-4a6d-bb8f-a0b65941a613"
+  },
+  "entities": {
+    "collections": [],
+    "environments": [],
+    "specs": [
+      "../postman/specs/new-specification.yaml",
+      "../postman/specs/Todo API.yaml",
+      "../postman/specs/Todo API SPec.yaml"
+    ],
+    "flows": [],
+    "globals": []
+  }
+}
