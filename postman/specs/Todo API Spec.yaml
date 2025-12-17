@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Todo API SPec
+  title: Todo API Spec
   version: 1.0.0
   description: |
     A RESTful API for managing TODO items. This API provides CRUD operations 
